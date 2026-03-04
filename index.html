@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Nákupy – rychlý záznam</title>
+<meta name="theme-color" content="#0f172a" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Nákupy" />
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icon.svg" />
+<style>
+:root {
+  --bg: #0f172a;
+  --surface: #0b1220;
+  --surface2: #111827;
+  --border: rgba(255,255,255,.09);
+  --text: #e5e7eb;
+  --muted: #64748b;
+  --accent: #22c55e;
+  --accent2: #16a34a;
+  --money: #fbbf24;
+  --danger: rgba(239,68,68,.8);
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+html, body {
+  height: 100%; background: var(--bg); color: var(--text);
+  font-family: 'SF Pro Display', ui-rounded, system-ui, sans-serif;
+  overscroll-behavior: none;
+}
+
+.app {
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ── HEADER ── */
+.hdr {
+  padding: 16px 18px 10px;
+  padding-top: calc(16px + env(safe-area-inset-top));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.hdr-title {
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.month-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.mnav-btn {
+  width: 28px; height: 28px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .1s;
+}
+.mnav-btn:active { background: #1e2a3d; }
+.month-label {
+  font-size: .8rem;
+  color: var(--text);
+  font-weight: 600;
+  min-width: 80px;
+  text-align: center;
+}
+
+/* ── HERO SOUČET ── */
+.hero {
+  padding: 10px 18px 18px;
+  text-align: center;
+}
+.hero-amt {
+  font-size: 3.2rem;
+  font-weight: 900;
+  color: var(--money);
+  letter-spacing: -2px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.hero-lbl {
+  font-size: .75rem;
+  color: var(--muted);
+  margin-top: 4px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+/* ── QUICK ADD ── */
+.add-block {
+  margin: 0 14px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 14px 14px 12px;
+}
+
+.amt-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.amt-input {
+  flex: 1;
+  height: 52px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--money);
+  font-size: 1.6rem;
+  font-weight: 800;
+  text-align: right;
+  padding: 0 14px;
+  font-variant-numeric: tabular-nums;
+  caret-color: var(--accent);
+  outline: none;
+  transition: border-color .15s;
+}
+.amt-input:focus { border-color: rgba(34,197,94,.4); }
+.amt-input::placeholder { color: var(--muted); font-size: 1.2rem; font-weight: 400; }
+
+/* ── KATEGORIE GRID ── */
+.cats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+  margin-bottom: 10px;
+}
+.cat-btn {
+  height: 52px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  font-size: .65rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  transition: background .1s, border-color .1s, transform .06s;
+  line-height: 1.2;
+  letter-spacing: .02em;
+}
+.cat-btn .ico { font-size: 1.2rem; line-height: 1; }
+.cat-btn:active { transform: scale(.93); }
+.cat-btn.sel {
+  background: rgba(34,197,94,.13);
+  border-color: rgba(34,197,94,.5);
+  color: #a7f3d0;
+}
+
+/* ── NÁZEV (volitelné) ── */
+.name-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.name-input {
+  flex: 1;
+  height: 42px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: .9rem;
+  padding: 0 12px;
+  outline: none;
+  transition: border-color .15s;
+}
+.name-input:focus { border-color: rgba(34,197,94,.3); }
+.name-input::placeholder { color: var(--muted); }
+
+.add-btn {
+  height: 42px;
+  padding: 0 18px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(160deg, var(--accent), var(--accent2));
+  color: #052e16;
+  font-size: .95rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: opacity .12s, transform .06s;
+  white-space: nowrap;
+  letter-spacing: .03em;
+}
+.add-btn:active { transform: scale(.95); opacity: .85; }
+.add-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+/* ── SEZNAM ── */
+.list-hdr {
+  padding: 4px 18px 8px;
+  font-size: .72rem;
+  color: var(--muted);
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.entries {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 14px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.entry {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  transition: background .1s;
+  animation: slideIn .18s ease;
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.entry-ico {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  width: 30px;
+  text-align: center;
+}
+.entry-body {
+  flex: 1;
+  min-width: 0;
+}
+.entry-name {
+  font-size: .88rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.entry-meta {
+  font-size: .72rem;
+  color: var(--muted);
+  margin-top: 1px;
+}
+.entry-amt {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--money);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.entry-del {
+  width: 28px; height: 28px;
+  border-radius: 7px;
+  border: 1px solid rgba(239,68,68,.2);
+  background: transparent;
+  color: rgba(239,68,68,.6);
+  font-size: .9rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background .1s, color .1s;
+}
+.entry-del:active { background: rgba(239,68,68,.12); color: var(--danger); }
+
+.empty {
+  text-align: center;
+  color: var(--muted);
+  font-size: .85rem;
+  padding: 32px 0;
+}
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  transform: translateX(-50%) translateY(12px);
+  background: var(--surface2);
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 999px;
+  padding: 10px 18px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-size: .88rem;
+  color: var(--text);
+  white-space: nowrap;
+  z-index: 99;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease, transform .18s ease;
+  box-shadow: 0 8px 24px rgba(0,0,0,.4);
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+.toast-undo {
+  color: var(--accent);
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+/* ── SEPARATOR ── */
+.day-sep {
+  font-size: .7rem;
+  color: var(--muted);
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 6px 2px 2px;
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-title">🛒 Nákupy</div>
+    <div class="month-nav">
+      <button class="mnav-btn" id="btnPrevMonth">‹</button>
+      <div class="month-label" id="monthLabel">—</div>
+      <button class="mnav-btn" id="btnNextMonth">›</button>
+    </div>
+  </div>
+
+  <!-- HERO SOUČET -->
+  <div class="hero">
+    <div class="hero-amt" id="heroAmt">0 Kč</div>
+    <div class="hero-lbl">utraceno tento měsíc</div>
+  </div>
+
+  <!-- QUICK ADD -->
+  <div class="add-block">
+    <div class="amt-row">
+      <input class="amt-input" id="qAmt" type="text" inputmode="decimal" placeholder="0 Kč" autocomplete="off" />
+    </div>
+    <div class="cats" id="catGrid"></div>
+    <div class="name-row">
+      <input class="name-input" id="qName" type="text" placeholder="Název (volitelně)" autocomplete="off" />
+      <button class="add-btn" id="btnAdd" disabled>+ Přidat</button>
+    </div>
+  </div>
+
+  <!-- SEZNAM -->
+  <div class="list-hdr" id="listHdr">Záznamy</div>
+  <div class="entries" id="entriesList"></div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span>Smazáno</span>
+  <span class="toast-undo" id="toastUndo">Zpět</span>
+</div>
+
+<script>
+// ── DATA ──
+const STORAGE_KEY = 'nakupy_light';
+
+const CATS = [
+  { key: 'es',     ico: '🛒', lbl: 'E‑shop'    },
+  { key: 'alza',   ico: '📱', lbl: 'Alza'      },
+  { key: 'food',   ico: '🍽️', lbl: 'Jídlo'    },
+  { key: 'fun',    ico: '🎮', lbl: 'Zábava'    },
+  { key: 'family', ico: '👪', lbl: 'Rodina'    },
+  { key: 'invest', ico: '📈', lbl: 'Investice' },
+  { key: 'cigs',   ico: '🚬', lbl: 'Cigarety'  },
+  { key: 'other',  ico: '📦', lbl: 'Ostatní'   },
+];
+
+// Viewing month state
+let viewYear  = new Date().getFullYear();
+let viewMonth = new Date().getMonth(); // 0-based
+
+let selectedCat = null;
+let toastTimer  = null;
+let undoEntry   = null;
+
+function load() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+  catch(_) { return []; }
+}
+function save(arr) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+}
+
+// ── UTILS ──
+const MONTH_CS = ['Leden','Únor','Březen','Duben','Květen','Červen',
+                  'Červenec','Srpen','Září','Říjen','Listopad','Prosinec'];
+
+function fmtMoney(n) {
+  return n.toLocaleString('cs-CZ', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' Kč';
+}
+function todayStr()  { return new Date().toISOString().slice(0,10); }
+function isoToLabel(iso) {
+  const today = todayStr();
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0,10);
+  if (iso === today) return 'Dnes';
+  if (iso === yesterday) return 'Včera';
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('cs-CZ', { day:'numeric', month:'short' });
+}
+function getCat(key) { return CATS.find(c => c.key === key) || { ico: '📦', lbl: 'Ostatní' }; }
+
+// ── BUILD CAT GRID ──
+function buildCatGrid() {
+  const grid = document.getElementById('catGrid');
+  grid.innerHTML = '';
+  CATS.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn' + (selectedCat === c.key ? ' sel' : '');
+    btn.innerHTML = `<span class="ico">${c.ico}</span><span>${c.lbl}</span>`;
+    btn.onclick = () => {
+      selectedCat = (selectedCat === c.key) ? null : c.key;
+      buildCatGrid();
+      validateAdd();
+    };
+    grid.appendChild(btn);
+  });
+}
+
+// ── VALIDATE ──
+function validateAdd() {
+  const amt = parseFloat(document.getElementById('qAmt').value.replace(',','.'));
+  document.getElementById('btnAdd').disabled = !(amt > 0 && selectedCat);
+}
+
+// ── ADD ──
+function addEntry() {
+  const amtRaw = document.getElementById('qAmt').value.replace(',','.');
+  const amt = parseFloat(amtRaw);
+  if (!(amt > 0) || !selectedCat) return;
+  const name = document.getElementById('qName').value.trim();
+  const entry = {
+    id:   Date.now(),
+    date: todayStr(),
+    cat:  selectedCat,
+    amt:  amt,
+    name: name || '',
+  };
+  const arr = load();
+  arr.unshift(entry);
+  save(arr);
+
+  // reset
+  document.getElementById('qAmt').value  = '';
+  document.getElementById('qName').value = '';
+  selectedCat = null;
+  buildCatGrid();
+  validateAdd();
+
+  // switch view to current month if navigated away
+  viewYear  = new Date().getFullYear();
+  viewMonth = new Date().getMonth();
+
+  render();
+  document.getElementById('qAmt').focus();
+}
+
+// ── DELETE ──
+function deleteEntry(id) {
+  const arr = load();
+  const idx = arr.findIndex(e => e.id === id);
+  if (idx === -1) return;
+  undoEntry = { entry: arr[idx], idx };
+  arr.splice(idx, 1);
+  save(arr);
+  render();
+  showToast();
+}
+
+function undoDelete() {
+  if (!undoEntry) return;
+  const arr = load();
+  arr.splice(undoEntry.idx, 0, undoEntry.entry);
+  save(arr);
+  undoEntry = null;
+  hideToast();
+  render();
+}
+
+// ── TOAST ──
+function showToast() {
+  clearTimeout(toastTimer);
+  document.getElementById('toast').classList.add('show');
+  toastTimer = setTimeout(hideToast, 5000);
+}
+function hideToast() {
+  clearTimeout(toastTimer);
+  document.getElementById('toast').classList.remove('show');
+}
+
+// ── RENDER ──
+function render() {
+  const all  = load();
+  const yyyy = viewYear;
+  const mm   = viewMonth;
+
+  // month label
+  document.getElementById('monthLabel').textContent = MONTH_CS[mm] + ' ' + yyyy;
+
+  // filter to view month
+  const prefix = yyyy + '-' + String(mm+1).padStart(2,'0');
+  const month  = all.filter(e => e.date.startsWith(prefix));
+
+  // hero sum
+  const total = month.reduce((s, e) => s + e.amt, 0);
+  document.getElementById('heroAmt').textContent = fmtMoney(total);
+
+  // list header
+  document.getElementById('listHdr').textContent =
+    month.length ? `Záznamy (${month.length})` : 'Záznamy';
+
+  // entries grouped by day
+  const list = document.getElementById('entriesList');
+  list.innerHTML = '';
+
+  if (!month.length) {
+    list.innerHTML = '<div class="empty">Žádné záznamy v tomto měsíci.</div>';
+    return;
+  }
+
+  // group by date
+  const groups = {};
+  month.forEach(e => {
+    if (!groups[e.date]) groups[e.date] = [];
+    groups[e.date].push(e);
+  });
+
+  Object.keys(groups).sort((a,b) => b.localeCompare(a)).forEach(date => {
+    // day separator
+    const sep = document.createElement('div');
+    sep.className = 'day-sep';
+    const dayTotal = groups[date].reduce((s,e) => s + e.amt, 0);
+    sep.textContent = isoToLabel(date) + '  –  ' + fmtMoney(dayTotal);
+    list.appendChild(sep);
+
+    groups[date].forEach(e => {
+      const cat = getCat(e.cat);
+      const row = document.createElement('div');
+      row.className = 'entry';
+      row.innerHTML = `
+        <div class="entry-ico">${cat.ico}</div>
+        <div class="entry-body">
+          <div class="entry-name">${e.name || cat.lbl}</div>
+          <div class="entry-meta">${cat.lbl}${e.name && e.name !== cat.lbl ? ' · ' + e.name : ''}</div>
+        </div>
+        <div class="entry-amt">${fmtMoney(e.amt)}</div>
+        <button class="entry-del" title="Smazat">✕</button>
+      `;
+      row.querySelector('.entry-del').onclick = () => deleteEntry(e.id);
+      list.appendChild(row);
+    });
+  });
+}
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded', () => {
+  buildCatGrid();
+  render();
+
+  // amt input
+  const qAmt = document.getElementById('qAmt');
+  qAmt.addEventListener('input', validateAdd);
+  qAmt.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('qName').focus(); });
+
+  // name input
+  document.getElementById('qName').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addEntry();
+  });
+
+  // add button
+  document.getElementById('btnAdd').onclick = addEntry;
+
+  // toast undo
+  document.getElementById('toastUndo').onclick = undoDelete;
+
+  // month nav
+  document.getElementById('btnPrevMonth').onclick = () => {
+    viewMonth--;
+    if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+    render();
+  };
+  document.getElementById('btnNextMonth').onclick = () => {
+    viewMonth++;
+    if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+    render();
+  };
+});
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js');
+  });
+}
+</script>
+</body>
+</html>
